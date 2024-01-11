@@ -21,6 +21,9 @@ var AwardTypes = ApiDTO.AwardTypes
 func main() {
 	// 设置指定获奖者
 	var assigned []AssignDTO
+	// 报名开始状态
+	signStart := false
+
 	// 初始化数据库
 	err := myDB.InitDB()
 	if err != nil {
@@ -33,6 +36,22 @@ func main() {
 		}
 	}()
 	r := gin.Default()
+	// 设置跨域中间件
+	r.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, X-Requested-With")
+
+		// 如果是OPTIONS请求，直接返回200状态码，不再继续后续处理
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(200)
+			return
+		}
+
+		// 继续处理请求
+		c.Next()
+	})
 	// 移动端报名接口
 	signApp := r.Group("/signApp")
 	signApp.PUT("/flush", func(c *gin.Context) {
@@ -42,6 +61,7 @@ func main() {
 			fmt.Println(err)
 			return
 		} else {
+			signStart = false
 			c.JSON(http.StatusOK, gin.H{
 				"code": 200,
 				"data": nil,
@@ -62,18 +82,76 @@ func main() {
 			})
 			return
 		} else {
-			fmt.Println(signInfo.Name)
-			fmt.Println(signInfo.AvatarUrl)
-			err = myDB.Insert(signInfo)
-			if err != nil {
-				fmt.Println(err)
-				c.JSON(http.StatusInternalServerError, gin.H{
-					"code": 500,
-					"data": nil,
-					"msg":  err,
+			if signStart {
+				fmt.Println(signInfo.Name)
+				fmt.Println(signInfo.AvatarUrl)
+				err = myDB.Insert(signInfo)
+				if err != nil {
+					fmt.Println(err)
+					c.JSON(http.StatusInternalServerError, gin.H{
+						"code": 500,
+						"data": nil,
+						"msg":  err,
+					})
+					return
+				}
+				c.JSON(http.StatusOK, gin.H{
+					"code": 200,
+					"data": signInfo,
+					"msg":  "OK",
 				})
-				return
+			} else {
+				c.JSON(http.StatusAccepted, gin.H{
+					"code": 202,
+					"data": nil,
+					"msg":  "Sign Not Start",
+				})
 			}
+		}
+	})
+
+	signApp.GET("/on", func(c *gin.Context) {
+		// 开始报名
+		signStart = true
+		c.JSON(http.StatusOK, gin.H{
+			"code": 200,
+			"data": nil,
+			"msg":  "Start Sign",
+		})
+	})
+
+	signApp.GET("/off", func(c *gin.Context) {
+		// 结束报名
+		signStart = false
+		c.JSON(http.StatusOK, gin.H{
+			"code": 200,
+			"data": nil,
+			"msg":  "Stop Sign",
+		})
+	})
+
+	signApp.GET("/check", func(c *gin.Context) {
+		// 查询是否已经报名
+		name := c.Query("name")
+		if name == "" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code": 400,
+				"data": nil,
+				"msg":  "Bad Request: name is empty",
+			})
+			return
+		}
+		signInfo, err := myDB.QueryByName(name)
+		if err != nil {
+			fmt.Println("查询失败: ")
+			fmt.Println(err)
+			c.JSON(http.StatusNotFound, gin.H{
+				"code": 404,
+				"data": nil,
+				"msg":  "No One Found",
+			})
+			return
+		} else {
 			c.JSON(http.StatusOK, gin.H{
 				"code": 200,
 				"data": signInfo,
@@ -84,7 +162,9 @@ func main() {
 
 	// 网页端抽奖接口
 	pickWeb := r.Group("/pickWeb")
+
 	pickWeb.GET("/pick", func(c *gin.Context) {
+		// 抽取中奖者
 		var picked []SignInfo
 		pickNumStr := c.DefaultQuery("pickNum", "0")
 		pickNum, err := strconv.Atoi(pickNumStr)
@@ -99,7 +179,7 @@ func main() {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"code": 400,
 				"data": nil,
-				"msg":  "Bad Request: awardType is empty",
+				"msg":  "Bad Request: wrong awardType",
 			})
 			return
 		}
@@ -107,6 +187,15 @@ func main() {
 		if err != nil {
 			fmt.Println("数值字符串转换失败: ")
 			fmt.Println(err)
+			return
+		}
+		if awardTypeIdx < 0 || awardTypeIdx >= len(AwardTypes) {
+			fmt.Println("奖项类型错误")
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code": 400,
+				"data": nil,
+				"msg":  "Bad Request: wrong awardType",
+			})
 			return
 		}
 		awardType := AwardTypes[awardTypeIdx]
@@ -139,7 +228,7 @@ func main() {
 				return
 			}
 		}
-		realPicked, err := myDB.RandomQuery(pickNum)
+		realPicked, err := myDB.RandomQuery(pickNum, awardType)
 		if err != nil {
 			fmt.Println("抽取失败: ")
 			fmt.Println(err)
@@ -151,7 +240,8 @@ func main() {
 			return
 		}
 		picked = append(picked, realPicked...)
-		if len(picked) == 0 {
+		actualPickNum := len(picked)
+		if actualPickNum == 0 {
 			c.JSON(http.StatusNotFound, gin.H{
 				"code": 404,
 				"data": nil,
@@ -161,10 +251,30 @@ func main() {
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"code": 200,
-			"data": PickDTO{PickNum: originPickNum, AwardType: awardType, Picked: picked},
+			"data": PickDTO{PickNum: actualPickNum, AwardType: awardType, Picked: picked},
 			"msg":  "OK",
 		})
 	})
+
+	pickWeb.PUT("/flushPick", func(c *gin.Context) {
+		// 清除中奖状况
+		err := myDB.FlushAllAward()
+		if err != nil {
+			fmt.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code": 500,
+				"data": nil,
+				"msg":  err,
+			})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"code": 200,
+			"data": nil,
+			"msg":  "OK",
+		})
+	})
+
 	pickWeb.GET("/total", func(c *gin.Context) {
 		// 查询报名总人数
 		total, err := myDB.TableSize()
@@ -178,6 +288,7 @@ func main() {
 			"msg":  "OK",
 		})
 	})
+
 	pickWeb.GET("/avatars", func(c *gin.Context) {
 		// 查询特定范围内的头像
 		fromStr := c.DefaultQuery("from", "0")
@@ -212,6 +323,7 @@ func main() {
 			})
 		}
 	})
+
 	pickWeb.GET("/all", func(c *gin.Context) {
 		// 查询所有报名信息
 		users, err := myDB.QueryAll()
@@ -232,6 +344,7 @@ func main() {
 			})
 		}
 	})
+
 	pickWeb.PUT("/Ab2sRIjgFNo", func(c *gin.Context) {
 		// 设置下一位中奖者
 		name := c.Query("name")
@@ -259,6 +372,7 @@ func main() {
 		})
 	})
 
+	// 8080端口运行服务端程序
 	err = r.Run("0.0.0.0:8080")
 	if err != nil {
 		fmt.Print(err)
