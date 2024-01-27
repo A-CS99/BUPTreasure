@@ -13,6 +13,9 @@ ENV GOPROXY=https://goproxy.cn,direct
 # 设置 GIN_MODE 为 "release"
 ENV GIN_MODE=release
 
+# Install dependencies
+RUN go mod download
+
 # Build the Go application
 RUN go build -o /app/bin
 
