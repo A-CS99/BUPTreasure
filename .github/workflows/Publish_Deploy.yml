@@ -63,7 +63,7 @@ jobs:
           key: ${{ secrets.PR_KEY }}
           script: |
             docker stop buptreasure-server-temp
+            docker rm buptreasure-server-temp
             docker rmi acs991314/buptreasure-server:latest
             docker pull acs991314/buptreasure-server:latest
-            docker rm buptreasure-server-temp
             docker run --name buptreasure-server-temp -p 9000:8080 --net bupt-net -v /home/nginx/html/temp:/app/buffer -d acs991314/buptreasure-server:latest
