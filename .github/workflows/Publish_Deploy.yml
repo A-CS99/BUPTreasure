@@ -38,17 +38,17 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-#      - name: Build and push
-#        id: docker_build
-#        uses: docker/build-push-action@v4
-#        with:
-#          context: .
-#          file: ./Dockerfile
-#          push: true
-#          platforms: linux/amd64,linux/arm64
-#          tags: |
-#            ${{ secrets.DOCKER_USERNAME }}/buptreasure-server:${{ steps.date.outputs.today }}
-#            ${{ secrets.DOCKER_USERNAME }}/buptreasure-server:latest
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/buptreasure-server:${{ steps.date.outputs.today }}
+            ${{ secrets.DOCKER_USERNAME }}/buptreasure-server:latest
   deploy:
     name: Deploy to Remote Server
     needs: build_docker
@@ -62,8 +62,8 @@ jobs:
           password: ${{ secrets.SUDO_PASSWORD }}
           key: ${{ secrets.PR_KEY }}
           script: |
-            docker stop buptreasure-server-temp
-            docker rm buptreasure-server-temp
+            docker stop buptreasure-server
+            docker rm buptreasure-server
             docker rmi acs991314/buptreasure-server:latest
             docker pull acs991314/buptreasure-server:latest
-            docker run --name buptreasure-server-temp -p 9000:8080 --net bupt-net -v /home/nginx/html/temp:/app/buffer -d acs991314/buptreasure-server:latest
+            docker run --name buptreasure-server -p 9000:8080 --net bupt-net -v /home/nginx/html/temp:/app/buffer -d acs991314/buptreasure-server:latest
