@@ -1,4 +1,4 @@
-name: Publish Docker Image to DockerHub
+name: Publish Docker Image & Deploy to Remote Server
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build_docker:
-    name: Build docker
+    name: Build and Push Docker Image
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
@@ -46,6 +46,8 @@ jobs:
     needs: build_docker
     runs-on: ubuntu-20.04
     steps:
+      - name: Change Docker socket permissions
+        run: sudo chmod 666 /var/run/docker.sock
       - name: Deploy to Remote Server
         uses: appleboy/ssh-action@master
         with:
