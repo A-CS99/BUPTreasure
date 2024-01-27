@@ -22,7 +22,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Get current date
+      - name: Get current date time
         id: date
         run: echo "::set-output name=today::$(date +'%Y-%m-%d_%H-%M')"
 
