@@ -38,17 +38,17 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push
-        id: docker_build
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: |
-            ${{ secrets.DOCKER_USERNAME }}/buptreasure-server:${{ steps.date.outputs.today }}
-            ${{ secrets.DOCKER_USERNAME }}/buptreasure-server:latest
+#      - name: Build and push
+#        id: docker_build
+#        uses: docker/build-push-action@v4
+#        with:
+#          context: .
+#          file: ./Dockerfile
+#          push: true
+#          platforms: linux/amd64,linux/arm64
+#          tags: |
+#            ${{ secrets.DOCKER_USERNAME }}/buptreasure-server:${{ steps.date.outputs.today }}
+#            ${{ secrets.DOCKER_USERNAME }}/buptreasure-server:latest
   deploy:
     name: Deploy to Remote Server
     needs: build_docker
