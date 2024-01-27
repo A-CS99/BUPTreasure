@@ -41,3 +41,21 @@ jobs:
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/buptreasure-server:${{ steps.date.outputs.today }}
             ${{ secrets.DOCKER_USERNAME }}/buptreasure-server:latest
+  deploy:
+    name: Deploy to Remote Server
+    needs: build_docker
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Deploy to Remote Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          password: ${{ secrets.SUDO_PASSWORD }}
+          key: ${{ secrets.PR_KEY }}
+          script: |
+            docker stop buptreasure-server-temp
+            docker rmi acs991314/buptreasure-server:latest
+            docker pull acs991314/buptreasure-server:latest
+            docker rm buptreasure-server-temp
+            docker run --name buptreasure-server-temp -p 9000:8080 --net bupt-net -v /home/nginx/html/temp:/app/buffer -d acs991314/buptreasure-server:latest
