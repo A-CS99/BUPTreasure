@@ -1,0 +1,54 @@
+name: CI_CD
+on:
+  push:
+    branches: [ master ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+      - name: Setup Go 📦
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.5'
+      - name: Set GOPROXY
+        run: |
+          go env -w GOPROXY=https://goproxy.cn,direct
+          go env -w GIN_MODE=release
+      - name: Build 🏗️
+        run: go build -o /app/bin
+      - name: Test 🧪
+        run: go test -v ./...
+      - name: Run 🏃
+        run: /app/bin
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+      - name: Build Docker Image
+        run: docker build -t buptreasure-server .
+      - name: Deploy to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: buptreasure-server
+          tags: latest
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            sudo su
+            ${{ secrets.SUDO_PASSWORD }}
+            docker stop buptreasure-server-container
+            docker rmi buptreasure-server
+            docker pull buptreasure-server
+            docker rm buptreasure-server-container
+            docker run --name buptreasure-server-container -p 9000:8080 --net bupt-net -v /home/nginx/html/temp:/app/buffer -d buptreasure-server
+            docker ps
