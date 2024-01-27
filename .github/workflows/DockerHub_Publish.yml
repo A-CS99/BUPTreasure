@@ -33,5 +33,5 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/BUPTreasure:${{ github.ref_name }}
-            ${{ secrets.DOCKER_USERNAME }}/BUPTreasure:latest
+            ${{ secrets.DOCKER_USERNAME }}/buptreasure:${{ github.ref_name }}
+            ${{ secrets.DOCKER_USERNAME }}/buptreasure:latest
