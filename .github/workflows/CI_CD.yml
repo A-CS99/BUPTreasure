@@ -19,8 +19,7 @@ jobs:
       - name: Build 🏗️
         run: go build -o ./bin
       - name: Set GIN_MODE
-        run: |
-          echo "export GIN_MODE=release" >> $GITHUB_ENV
+        run: echo "export GIN_MODE=release" >> $GITHUB_ENV
       - name: Run 🏃
         run: ./bin
   deploy:
