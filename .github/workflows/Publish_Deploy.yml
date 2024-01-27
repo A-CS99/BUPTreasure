@@ -3,8 +3,16 @@ name: Publish Docker Image & Deploy to Remote Server
 on:
   push:
     branches: [master]
+    # 仅当main.go文件或internal文件夹内容发生变化时才触发
+    paths:
+      - 'main.go'
+      - 'internal/**'
+      - 'go.mod'
+      - 'go.sum'
+      - '.github/workflows/**'
   release:
-    types: [created] # 表示在创建新的 Release 时触发
+    # 表示在创建新的 Release 时触发
+    types: [created]
 
 jobs:
   build_docker:
@@ -30,24 +38,22 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push
-        id: docker_build
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: |
-            ${{ secrets.DOCKER_USERNAME }}/buptreasure-server:${{ steps.date.outputs.today }}
-            ${{ secrets.DOCKER_USERNAME }}/buptreasure-server:latest
+#      - name: Build and push
+#        id: docker_build
+#        uses: docker/build-push-action@v4
+#        with:
+#          context: .
+#          file: ./Dockerfile
+#          push: true
+#          platforms: linux/amd64,linux/arm64
+#          tags: |
+#            ${{ secrets.DOCKER_USERNAME }}/buptreasure-server:${{ steps.date.outputs.today }}
+#            ${{ secrets.DOCKER_USERNAME }}/buptreasure-server:latest
   deploy:
     name: Deploy to Remote Server
     needs: build_docker
     runs-on: ubuntu-20.04
     steps:
-      - name: Change Docker socket permissions
-        run: sudo chmod 666 /var/run/docker.sock
       - name: Deploy to Remote Server
         uses: appleboy/ssh-action@master
         with:
