@@ -43,8 +43,6 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           key: ${{ secrets.PR_KEY }}
           script: |
-#            sudo su
-#            ${{ secrets.SUDO_PASSWORD }}
             docker stop buptreasure-server-container
             docker rmi buptreasure-server
             docker pull buptreasure-server
