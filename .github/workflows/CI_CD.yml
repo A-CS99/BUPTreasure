@@ -16,9 +16,10 @@ jobs:
         run: |
           go env -w GOPROXY=https://goproxy.cn,direct
           go mod download
-          go env -w GIN_MODE=release
       - name: Build 🏗️
         run: go build -o /app/bin
+      - name: Set GIN_MODE
+        run: go env -w GIN_MODE=release
       - name: Test 🧪
         run: go test -v ./...
       - name: Run 🏃
