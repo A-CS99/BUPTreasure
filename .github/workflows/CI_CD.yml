@@ -41,7 +41,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          key: ${{ secrets.HJMPUBKEY }}
+          key: ${{ secrets.PR_KEY }}
           script: |
             sudo su
             ${{ secrets.SUDO_PASSWORD }}
