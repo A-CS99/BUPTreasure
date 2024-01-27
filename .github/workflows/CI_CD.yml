@@ -21,7 +21,7 @@ jobs:
       - name: Set GIN_MODE
         run: echo "export GIN_MODE=release" >> $GITHUB_ENV
       - name: Run 🏃
-        run: ./bin
+        run: ./bin/BUPTreasure.exe
   deploy:
     runs-on: ubuntu-latest
     needs: build
