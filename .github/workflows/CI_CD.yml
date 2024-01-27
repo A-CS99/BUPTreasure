@@ -35,6 +35,8 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: buptreasure-server
           tags: latest
+      - name: Adding Known Hosts
+        run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
       - name: Deploy to Server
         uses: appleboy/ssh-action@master
         with:
