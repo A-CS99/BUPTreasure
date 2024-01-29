@@ -10,21 +10,21 @@
 ```
 BUPTreasure
 ├── .github
-│   ├── workflows
-│   │   └── Publish_Deploy.yml
+│   └── workflows
+│       └── Publish_Deploy.yml
 ├── buffer
-│   ├── lottery-config-users.json
+│   └── lottery-config-users.json
 ├── internal
 │   ├── ApiDTO
-│   │   ├── api.go
-│   ├── myDB
-│   │   ├── db-operation.go
+│   │   └── api.go
+│   └── myDB
+│       └── db-operation.go
 ├── main.go
 ├── go.mod
 ├── go.sum
 ├── Dockerfile
 ├── .gitignore
-├── README.md
+└── README.md
 ```
 
 ## 项目部署
