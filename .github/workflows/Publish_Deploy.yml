@@ -62,8 +62,5 @@ jobs:
           password: ${{ secrets.SUDO_PASSWORD }}
           key: ${{ secrets.PR_KEY }}
           script: |
-            docker stop buptreasure-server
-            docker rm buptreasure-server
-            docker rmi acs991314/buptreasure-server:latest
-            docker pull acs991314/buptreasure-server:latest
-            docker run --name buptreasure-server -p 9000:8080 --net bupt-net -v /home/nginx/html/temp:/app/buffer -d acs991314/buptreasure-server:latest
+            cd /home/lantu/buptreasure
+            docker-compose up -d --force-recreate buptreasure-server
