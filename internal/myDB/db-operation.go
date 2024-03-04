@@ -14,12 +14,22 @@ type SignInfoJson = ApiDTO.SignInfoJson
 
 var Db *sql.DB
 
-var createTableSql = `create table if not exists User
+var createUserTableSql = `create table if not exists User
     	(
 			id       int primary key auto_increment,
 			name     varchar(20) not null,
 			avatarUrl text not null,
 			prize    varchar(10) default '未中奖'
+		);`
+
+var createActivityTableSql = `create table if not exists Activity
+		(
+			id       int primary key auto_increment,
+			name     varchar(20) not null,
+			startTime datetime not null,
+			endTime   datetime not null,
+			weappBg  text,
+			webBg  text
 		);`
 
 func InitDB() (err error) {
@@ -41,14 +51,21 @@ func InitDB() (err error) {
 	Db.SetMaxIdleConns(10)
 	Db.SetMaxOpenConns(10)
 	// 创建User表
-	sqlStr := createTableSql
+	sqlStr := createUserTableSql
 	_, err = Db.Exec(sqlStr)
 	if err != nil {
 		fmt.Println("创建User表失败: ")
 		fmt.Println(err)
 		return err
 	}
+	_, err = Db.Exec(createActivityTableSql)
+	if err != nil {
+		fmt.Println("创建Activity表失败: ")
+		fmt.Println(err)
+		return err
+	}
 	fmt.Println("创建User表成功")
+	fmt.Println("创建Activity表成功")
 	return nil
 }
 
@@ -62,7 +79,7 @@ func FlushTable() (err error) {
 	}
 	fmt.Println("删除User表成功")
 	// 创建User表
-	sqlStr = createTableSql
+	sqlStr = createUserTableSql
 	_, err = Db.Exec(sqlStr)
 	if err != nil {
 		fmt.Println("创建User表失败: ")

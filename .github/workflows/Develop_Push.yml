@@ -59,4 +59,4 @@ jobs:
           key: ${{ secrets.PR_KEY }}
           script: |
             cd /home/acs/buptreasure
-            docker-compose up -d --force-recreate buptreasure-server:test
+            sudo docker-compose up -d --force-recreate buptreasure-server
