@@ -104,4 +104,4 @@ BUPTreasure
             external: true
       ```
 - Github Actions自动化部署
-    - 项目Github Actions配置文件：[Publish_Deploy.yml](./.github/workflows/Publish_Deploy.yml)
+    - 项目Github Actions配置文件：[Publish_Deploy.yml](./.github/workflows/Master_Push.yml)

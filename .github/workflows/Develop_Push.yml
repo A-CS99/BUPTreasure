@@ -1,8 +1,8 @@
-name: Publish Docker Image & Deploy to Remote Server
+name: [Develop] Publish Docker Image & Deploy to Remote Server
 
 on:
   push:
-    branches: [master]
+    branches: [develop]
     # 仅当main.go文件或internal文件夹内容发生变化时才触发
     paths:
       - 'main.go'
@@ -10,9 +10,6 @@ on:
       - 'go.mod'
       - 'go.sum'
       - '.github/workflows/**'
-  release:
-    # 表示在创建新的 Release 时触发
-    types: [created]
 
 jobs:
   build_docker:
@@ -57,9 +54,8 @@ jobs:
       - name: Deploy to Remote Server
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
-          password: ${{ secrets.SUDO_PASSWORD }}
+          host: ${{ secrets.REMOTE_HOST_TEST }}
+          username: ${{ secrets.REMOTE_USER_TEST }}
           key: ${{ secrets.PR_KEY }}
           script: |
             cd /home/lantu/buptreasure
