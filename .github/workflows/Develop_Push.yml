@@ -45,7 +45,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/buptreasure-server:${{ steps.date.outputs.today }}
-            ${{ secrets.DOCKER_USERNAME }}/buptreasure-server:latest
+            ${{ secrets.DOCKER_USERNAME }}/buptreasure-server:test
   deploy:
     name: Deploy to Remote Server
     needs: build_docker
@@ -58,5 +58,5 @@ jobs:
           username: ${{ secrets.REMOTE_USER_TEST }}
           key: ${{ secrets.PR_KEY }}
           script: |
-            cd /home/lantu/buptreasure
+            cd /home/acs/buptreasure
             docker-compose up -d --force-recreate buptreasure-server
