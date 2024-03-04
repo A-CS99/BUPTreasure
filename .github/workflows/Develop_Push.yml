@@ -1,4 +1,4 @@
-name: [Develop] Publish Docker Image & Deploy to Remote Server
+name: Develop_Publish Docker Image & Deploy to Remote Server
 
 on:
   push:

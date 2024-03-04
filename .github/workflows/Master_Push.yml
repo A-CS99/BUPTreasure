@@ -1,4 +1,4 @@
-name: [Master] Publish Docker Image & Deploy to Remote Server
+name: Master_Publish Docker Image & Deploy to Remote Server
 
 on:
   push:
