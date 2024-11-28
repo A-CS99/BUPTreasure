@@ -4,12 +4,14 @@ type SignInfo struct {
 	ID        int    `json:"id"`
 	Name      string `json:"name"`
 	AvatarUrl string `json:"avatarUrl"`
+	StudentId string `json:"studentId"`
 }
 
 type SignInfoJson struct {
 	ID     int    `json:"id"`
 	Name   string `json:"name"`
 	Avatar string `json:"avatar"`
+	StudentId string `json:"studentId"`
 }
 
 type PickDTO struct {

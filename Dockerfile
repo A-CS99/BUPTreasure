@@ -17,7 +17,7 @@ ENV GIN_MODE=release
 RUN go mod download
 
 # Build the Go application
-RUN go build -o /app/bin
+RUN go build -o /app/bin/BUPTreasure
 
 # Expose a port
 EXPOSE 8080
