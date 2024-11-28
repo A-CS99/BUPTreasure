@@ -83,8 +83,6 @@ func main() {
 			return
 		} else {
 			if signStart {
-				fmt.Println(signInfo.Name)
-				fmt.Println(signInfo.AvatarUrl)
 				err = myDB.Insert(signInfo)
 				if err != nil {
 					fmt.Println(err)
